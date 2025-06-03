@@ -17,7 +17,7 @@ struct Display
     SDL_Renderer* renderer = nullptr;
     const char* name = "Chip-8";
 
-    int scale = 20;
+    int scale = 12;
     int width = RES_WIDTH * scale;
     int height = RES_HEIGHT * scale;
 
@@ -64,8 +64,8 @@ struct Display
                 if (buffer[(row * RES_WIDTH) + col] == 0x1)
                 {
                     const SDL_FRect rect = {
-                        (float) (col * scale) - (scale > 1 ? scale : 0),
-                        (float) (row * scale) - (scale > 1 ? scale : 0),
+                        (float) (col * scale),
+                        (float) (row * scale),
                         (float) scale,
                         (float) scale 
                     };

@@ -12,6 +12,7 @@ struct Chip8
 {
     Cpu cpu;
     Gpu gpu;
+    Display display;
 
     void loadROM(const char* romFile, uint16_t startAddress)
     {
@@ -32,4 +33,4 @@ struct Chip8
     }
 };
 
-void tick(Chip8& chip8, Display& display);
+void tick(Chip8& chip8);

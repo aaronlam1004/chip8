@@ -1,9 +1,10 @@
 #include "Chip8.hpp"
 
-void tick(Chip8& chip8, Display& display)
+void tick(Chip8& chip8)
 {
     Cpu& cpu = chip8.cpu;
     Gpu& gpu = chip8.gpu;
+    Display& display = chip8.display;
 
     uint16_t operation = cpu.readOperation();
     printf("[Operation]: 0x%04x\n", operation);
@@ -221,15 +222,56 @@ void tick(Chip8& chip8, Display& display)
                     cpu.registers[0xF] = true;
                 }
             }
-            display.draw(gpu.buffer);
             cpu.PC += 2;
+        } break;
+        case KEY: // EX??
+        {
+            uint8_t x = (operation & 0xF00) >> 8;
+            uint16_t keyOp = (operation & 0xFF);
+            uint8_t key = cpu.registers[x] & 0xF;
+            switch (keyOp)
+            {
+                case NE_KEY_VX:
+                {
+                    if (true) // key == 
+                    {
+                        cpu.PC += 4;
+                    }
+                    else
+                    {
+                        cpu.PC += 2;
+                    }
+                } break;
+                default: break;
+            }
         } break;
         case HW: // 0xFX??
         {
             uint8_t x = (operation & 0xF00) >> 8;
-            uint16_t hardwareOp = (operation & 0xFF);
-            switch (hardwareOp)
+            uint16_t hwOp = (operation & 0xFF);
+            switch (hwOp)
             {
+                case GET_DELAY:
+                {
+                    cpu.registers[x] = cpu.delayTimer;
+                } break;
+                case STORE_BCD:
+                {
+                    uint16_t value = cpu.registers[x];
+                    uint8_t index = 2;
+                    while (value > 0)
+                    {
+                        // NOTE: Ideally could also reverse number using
+                        //       divides and mods and update based on reversed
+                        cpu.memory[cpu.I + index] = value % 10;
+                        value /= 10;
+                        index--;
+                    }
+                } break;
+                case ADD_I_VX:
+                {
+                    cpu.I += cpu.registers[x];
+                } break;
                 case REG_DUMP:
                 {
                     memcpy(&cpu.memory[cpu.I], cpu.registers, x + 1);

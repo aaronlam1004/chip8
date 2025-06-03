@@ -7,14 +7,14 @@
 #include "Display.hpp"
 
 Chip8 chip8;
-Display display;
 
 int main(int argc, char* argv)
 {
     printf("Hello World!\n");
 
-    chip8.loadROM("roms/test_opcode.ch8", 0x200);
-    // chip8.loadROM("roms/2-ibm-logo.ch8", 0x200);
+    // chip8.loadROM("roms/test_opcode.ch8", 0x200);
+    chip8.loadROM("roms/2-ibm-logo.ch8", 0x200);
+    // chip8.loadROM("roms/space_invaders.ch8", 0x200);
 
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
@@ -22,7 +22,7 @@ int main(int argc, char* argv)
         return 1;
     }
 
-    if (!display.init())
+    if (!chip8.display.init())
     {
         return 1;
     }
@@ -47,8 +47,9 @@ int main(int argc, char* argv)
                 default: break;
             }
         }
-        tick(chip8, display);
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        tick(chip8);
+        chip8.display.draw(chip8.gpu.buffer);
+        // std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     return 0;

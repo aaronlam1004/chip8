@@ -2,6 +2,26 @@
 
 #include <stdint.h>
 
+enum Keys
+{
+    KEY_1 = 0,
+    KEY_2,
+    KEY_3,
+    KEY_C,
+    KEY_4,
+    KEY_5,
+    KEY_6,
+    KEY_D,
+    KEY_7,
+    KEY_8,
+    KEY_9,
+    KEY_E,
+    KEY_A,
+    KEY_0,
+    KEY_B,
+    KEY_f
+};
+
 enum OpcodeMasks : uint8_t
 {
     SYS      = 0x0, // 0x0NNN
@@ -16,6 +36,7 @@ enum OpcodeMasks : uint8_t
     NE_VX_VY = 0x9, // 0x9XY0
     SET_I    = 0xA, // 0xANNN
     DRAW     = 0xD, // 0xDXYN
+    KEY      = 0xE, // 0xEX??
     HW       = 0xF, // 0xFX??
 };
 
@@ -38,10 +59,21 @@ enum MathOperations : uint8_t
     SHIFT_LEFT = 0xE
 };
 
-enum HardwareOperations : uint8_t
+enum KeyOperations : uint8_t
+{
+    NE_KEY_VX = 0xA1
+};
+
+enum TimerOperations : uint8_t
 {
     SET_DELAY_TIMER = 0x07,
+};
+
+enum MemoryOperations : uint8_t
+{
+    GET_DELAY = 0x07,
     STORE_BCD = 0x33,
+    ADD_I_VX = 0x1E,
     REG_DUMP = 0x55,
     REG_LOAD = 0x65,
 };
