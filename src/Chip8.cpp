@@ -7,7 +7,7 @@ void tick(Chip8& chip8)
     Display& display = chip8.display;
 
     uint16_t operation = cpu.readOperation();
-    printf("[Operation]: 0x%04x\n", operation);
+    // printf("[Operation]: 0x%04x\n", operation);
 
     uint8_t opcodeMask = (operation >> 12);
     switch (opcodeMask)
@@ -25,7 +25,7 @@ void tick(Chip8& chip8)
                 } break;
                 case RETURN:
                 {
-                    printf("[RETURN]\n");
+                    // printf("[RETURN]\n");
                     uint16_t address = 0x0000;
                     if (cpu.popFromStack(address))
                     {
@@ -42,13 +42,13 @@ void tick(Chip8& chip8)
         case JUMP: // 0x1NNN
         {
             uint16_t address = (operation & 0xFFF);
-            printf("[JUMP]: 0x%04x\n", address);
+            // printf("[JUMP]: 0x%04x\n", address);
             cpu.PC = address;
         } break;
         case FUNC: // 0x2NNN
         {
             uint16_t address = (operation & 0xFFF);
-            printf("[FUNC]: 0x%04x\n", address);
+            // printf("[FUNC]: 0x%04x\n", address);
             cpu.pushToStack(cpu.PC);
             cpu.PC = address;
         } break;
@@ -56,7 +56,7 @@ void tick(Chip8& chip8)
         {
             uint8_t x = (operation & 0xF00) >> 8;
             uint16_t value = (operation & 0xFF);
-            printf("[EQ %d] %d == %d\n", x, cpu.registers[x], value);
+            // printf("[EQ %d] %d == %d\n", x, cpu.registers[x], value);
             if (cpu.registers[x] == value)
             {
                 cpu.PC += 4;
@@ -70,7 +70,7 @@ void tick(Chip8& chip8)
         {
             uint8_t x = (operation & 0xF00) >> 8;
             uint16_t value = (operation & 0xFF);
-            printf("[NE %d] %d != %d\n", x, cpu.registers[x], value);
+            // printf("[NE %d] %d != %d\n", x, cpu.registers[x], value);
             if (cpu.registers[x] != value)
             {
                 cpu.PC += 4;
@@ -86,7 +86,7 @@ void tick(Chip8& chip8)
             {
                 uint8_t x = (operation & 0xF00) >> 8;
                 uint8_t y = (operation & 0xF0) >> 4;
-                printf("[EQ %d %d] %d == %d\n", x, y, cpu.registers[x], cpu.registers[y]);
+                // printf("[EQ %d %d] %d == %d\n", x, y, cpu.registers[x], cpu.registers[y]);
                 if (cpu.registers[x] == cpu.registers[y])
                 {
                     cpu.PC += 4;
@@ -104,7 +104,7 @@ void tick(Chip8& chip8)
             {
                 uint8_t x = (operation & 0xF00) >> 8;
                 uint8_t y = (operation & 0xF0) >> 4;
-                printf("[NE %d %d] %d != %d\n", x, y, cpu.registers[x], cpu.registers[y]);
+                // printf("[NE %d %d] %d != %d\n", x, y, cpu.registers[x], cpu.registers[y]);
                 if (cpu.registers[x] != cpu.registers[y])
                 {
                     cpu.PC += 4;
@@ -119,7 +119,7 @@ void tick(Chip8& chip8)
         {
             uint8_t x = (operation & 0xF00) >> 8;
             uint16_t value = (operation & 0xFF); 
-            printf("[VAR %d] = %d\n", x, value);
+            // printf("[VAR %d] = %d\n", x, value);
             cpu.registers[x] = value;
             cpu.PC += 2;
         } break;
@@ -127,7 +127,7 @@ void tick(Chip8& chip8)
         {
             uint8_t x = (operation & 0xF00) >> 8;
             uint16_t value = (operation & 0xFF);
-            printf("[VAR %d] += %d\n", x, value);
+            // printf("[VAR %d] += %d\n", x, value);
             cpu.registers[x] += value;
             cpu.PC += 2;
         } break;
@@ -198,7 +198,7 @@ void tick(Chip8& chip8)
         case SET_I: // 0xANNN
         {
             uint16_t value = (operation & 0xFFF);
-            printf("[I] = 0x%03x\n", value);
+            // printf("[I] = 0x%03x\n", value);
             cpu.I = value;
             cpu.PC += 2;
         } break;
@@ -210,13 +210,13 @@ void tick(Chip8& chip8)
             
             uint8_t coordX = cpu.registers[x];
             uint8_t coordY = cpu.registers[y];
-            printf("[DRAW (%d, %d)]: (I=0x%03x, N=%d)\n", coordX, coordY, cpu.I, height);
+            // printf("[DRAW (%d, %d)]: (I=0x%03x, N=%d)\n", coordX, coordY, cpu.I, height);
 
             cpu.registers[0xF] = false;
             for (int i = 0; i < height; ++i)
             {
                 uint8_t rowData = cpu.memory[cpu.I + i];
-                printf("[ROW_DATA] = 0x%02x\n", rowData);
+                // printf("[ROW_DATA] = 0x%02x\n", rowData);
                 if (gpu.draw(coordX, coordY + i, rowData))
                 {
                     cpu.registers[0xF] = true;
@@ -231,9 +231,20 @@ void tick(Chip8& chip8)
             uint8_t key = cpu.registers[x] & 0xF;
             switch (keyOp)
             {
+                case EQ_KEY_VX:
+                {
+                    if (chip8.keyPad[key])
+                    {
+                        cpu.PC += 4;
+                    }
+                    else
+                    {
+                        cpu.PC += 2;
+                    }
+                } break;
                 case NE_KEY_VX:
                 {
-                    if (true) // key == 
+                    if (!chip8.keyPad[key])
                     {
                         cpu.PC += 4;
                     }
@@ -247,6 +258,7 @@ void tick(Chip8& chip8)
         } break;
         case HW: // 0xFX??
         {
+            cpu.PC += 2;
             uint8_t x = (operation & 0xF00) >> 8;
             uint16_t hwOp = (operation & 0xFF);
             switch (hwOp)
@@ -254,6 +266,17 @@ void tick(Chip8& chip8)
                 case GET_DELAY:
                 {
                     cpu.registers[x] = cpu.delayTimer;
+                } break;
+                case SET_DELAY:
+                {
+                    cpu.delayTimer = cpu.registers[x];
+                } break;
+                case WAIT_KEY:
+                {
+                    if (!chip8.newPress)
+                    {
+                        cpu.PC -= 2;
+                    }
                 } break;
                 case STORE_BCD:
                 {
@@ -282,8 +305,7 @@ void tick(Chip8& chip8)
                 }; break;
                 default: break;
             }
-            cpu.PC += 2;
         } break;
         default: break;
-    }
+    } 
 }

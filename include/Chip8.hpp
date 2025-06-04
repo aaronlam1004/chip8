@@ -7,12 +7,29 @@
 #include "Cpu.hpp"
 #include "Gpu.hpp"
 #include "Display.hpp"
+#include "Keys.hpp"
 
 struct Chip8
 {
     Cpu cpu;
     Gpu gpu;
     Display display;
+
+    bool newPress = false;
+    bool keyPad[NUM_KEYS] = {false};
+
+    void keyInterrupt(uint8_t key, bool pressed)
+    {
+        if (pressed && keyPad[key] != pressed)
+        {
+            newPress = true;
+        }
+        else
+        {
+            newPress = false;
+        }
+        keyPad[key] = pressed;
+    }
 
     void loadROM(const char* romFile, uint16_t startAddress)
     {
