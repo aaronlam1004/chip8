@@ -309,3 +309,18 @@ void tick(Chip8& chip8)
         default: break;
     } 
 }
+
+void updateTimers(Chip8& chip8)
+{
+    uint8_t& delayTimer = chip8.cpu.delayTimer;
+    uint8_t& soundTimer = chip8.cpu.soundTimer;
+
+    if (delayTimer > 0)
+    {
+        delayTimer--;
+    }
+    if (soundTimer > 0)
+    {
+        soundTimer--;
+    }
+}

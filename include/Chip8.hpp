@@ -51,3 +51,4 @@ struct Chip8
 };
 
 void tick(Chip8& chip8);
+void updateTimers(Chip8& chip8);

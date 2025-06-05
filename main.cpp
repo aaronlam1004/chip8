@@ -6,15 +6,24 @@
 #include "Display.hpp"
 #include "Keys.hpp"
 
+static const int INSTRUCTIONS_PER_STEP = 700;
+static const int REFRESH_RATE = 60;
+
 Chip8 chip8;
 
-int main(int argc, char* argv)
+int main(int argc, char* argv[])
 {
-    printf("Hello World!\n");
+    printf("Hello Chip-8!\n");
+    if (argc == 2)
+    {
+        printf("%s\n", argv[1]);
+        chip8.loadROM(argv[1], 0x200);
+    }
+    else
+    {
+        chip8.loadROM("roms/test_opcode.ch8", 0x200);
+    }
 
-    // chip8.loadROM("roms/test_opcode.ch8", 0x200);
-    // chip8.loadROM("roms/2-ibm-logo.ch8", 0x200);
-    chip8.loadROM("roms/space_invaders.ch8", 0x200);
 
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
@@ -31,7 +40,6 @@ int main(int argc, char* argv)
     SDL_Event event;
     SDL_zero(event);
 
-    int timeCount = 0;
     while (running)
     {
         while (SDL_PollEvent(&event))
@@ -53,7 +61,7 @@ int main(int argc, char* argv)
                         case SDL_SCANCODE_Q: { chip8.keyInterrupt(KEY_4, true); } break;
                         case SDL_SCANCODE_W: { chip8.keyInterrupt(KEY_5, true); } break;
                         case SDL_SCANCODE_E: { chip8.keyInterrupt(KEY_6, true); } break;
-                        // SDL_SCANCODE_R: { chip8.keyInterrupt(KEY_C) } break;
+                        // case SDL_SCANCODE_R: { chip8.keyInterrupt(KEY_C) } break;
                         case SDL_SCANCODE_ESCAPE: { running = false; } break;
                         default: break;
                     }
@@ -69,34 +77,21 @@ int main(int argc, char* argv)
                         case SDL_SCANCODE_Q: { chip8.keyInterrupt(KEY_4, false); } break;
                         case SDL_SCANCODE_W: { chip8.keyInterrupt(KEY_5, false); } break;
                         case SDL_SCANCODE_E: { chip8.keyInterrupt(KEY_6, false); } break;
-                        // SDL_SCANCODE_R: { chip8.keyInterrupt(KEY_C) } break;
+                        // case SDL_SCANCODE_R: { chip8.keyInterrupt(KEY_C) } break;
                         default: break;
                     }
                 } break;
                 default: break;
             }
         }
-        tick(chip8);
-        chip8.display.draw(chip8.gpu.buffer);
-        
-        float clockSpeed = 1e6;
-        int delay = (int) (1e6 / clockSpeed);
 
-        timeCount++;
-        if (timeCount >= (int) (2000 / 60))
+        for (int i = 0; i < (int) (INSTRUCTIONS_PER_STEP / REFRESH_RATE); ++i)
         {
-            timeCount = 0;
-            if (chip8.cpu.delayTimer > 0)
-            {
-                chip8.cpu.delayTimer--;
-            }
-
-            if (chip8.cpu.soundTimer > 0)
-            {
-                chip8.cpu.soundTimer--;
-            }
+            tick(chip8);
         }
-        // std::this_thread::sleep_for(std::chrono::microseconds(delay));
+        updateTimers(chip8);
+        chip8.display.draw(chip8.gpu.buffer);
+        std::this_thread::sleep_for(std::chrono::milliseconds(INSTRUCTIONS_PER_STEP / REFRESH_RATE));
     }
 
     return 0;
